@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DOMMA • Admin — PDV</title>
+  <meta name="color-scheme" content="dark light" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="brand">
+      <img src="./assets/logo.svg" alt="" aria-hidden="true" />
+      <strong>DOMMA • Admin</strong>
+    </div>
+    <div class="actions">
+      <button id="themeToggle" class="btn ghost" aria-pressed="true" aria-label="Alternar tema">
+        Tema: <span id="themeLabel">Dark</span>
+      </button>
+      <button id="userMenu" class="btn">Modo</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" aria-label="Menu principal">
+      <ul>
+        <li><a class="active" href="#" data-view="dashboard">Dashboard</a></li>
+        <li><a href="#" data-view="vendas">Vendas</a></li>
+        <li><a href="#" data-view="caixa">Caixa</a></li>
+        <li><a href="#" data-view="inventario">Inventário</a></li>
+        <li><a href="#" data-view="produtos">Produtos</a></li>
+        <li><a href="#" data-view="clientes">Clientes</a></li>
+        <li><a href="#" data-view="financeiro">Financeiro</a></li>
+        <li><a href="#" data-view="despesas">Despesas</a></li>
+        <li><a href="#" data-view="rupturas">Rupturas</a></li>
+        <li><a href="#" data-view="ajuda">Ajuda</a></li>
+      </ul>
+    </nav>
+
+    <main class="content" role="main">
+      <h1>Painel de Controle</h1>
+
+      <section class="tabs" aria-label="Abas de vendas">
+        <button class="tab active" data-tab="pdv" aria-selected="true">PDV</button>
+        <button class="tab" data-tab="historico" aria-selected="false">Histórico</button>
+      </section>
+
+      <!-- PDV -->
+      <section id="tab-pdv" class="card">
+        <h2 class="card-title">PDV / Bipagem</h2>
+
+        <form id="scanForm" class="grid grid-4" aria-describedby="dicas">
+          <label class="span-3">
+            <span class="label">Código/SKU (bipe aqui)</span>
+            <input id="skuInput" name="sku" placeholder="SKU, código de barras ou nome do produto" autocomplete="off" />
+          </label>
+
+          <label>
+            <span class="label">Qtd</span>
+            <input id="qtyInput" name="qty" type="number" min="1" step="1" value="1" inputmode="numeric" />
+          </label>
+
+          <label class="span-2">
+            <span class="label">Cliente</span>
+            <div class="combo">
+              <input id="clienteInput" list="clientes" placeholder="Selecionar cliente (nome)" />
+              <datalist id="clientes"></datalist>
+              <button type="button" id="novoCliente" class="btn icon" title="Novo cliente" aria-label="Novo cliente">+</button>
+            </div>
+          </label>
+
+          <label>
+            <span class="label">Preço (R$)</span>
+            <input id="priceInput" name="price" type="number" step="0.01" placeholder="auto" />
+          </label>
+
+          <div class="actions-right">
+            <button id="addItem" class="btn primary" type="submit">+ Adicionar</button>
+          </div>
+        </form>
+
+        <p id="dicas" class="muted small">
+          Dicas: Enter = adicionar • Ctrl+Backspace = limpar itens • Em mobile, bipador USB‑C funciona como teclado.
+        </p>
+
+        <div class="table-wrap" role="region" aria-label="Itens">
+          <table class="table" id="itensTable">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Variante</th>
+                <th>Qtd</th>
+                <th>Preço</th>
+                <th>Total</th>
+                <th><span class="sr-only">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <form id="fechamentoForm" class="checkout grid grid-6">
+          <fieldset class="span-2">
+            <legend>Pagamento</legend>
+            <label>
+              <span class="label">Forma</span>
+              <select id="pagamento">
+                <option>Dinheiro</option>
+                <option>Cartão Débito</option>
+                <option>Cartão Crédito</option>
+                <option>PIX</option>
+              </select>
+            </label>
+            <label>
+              <span class="label">Parcelas</span>
+              <input id="parcelas" type="number" min="1" step="1" value="1" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Descontos</legend>
+            <label>
+              <span class="label">Desconto (R$)</span>
+              <input id="descontoValor" type="number" min="0" step="0.01" value="0" />
+            </label>
+            <label>
+              <span class="label">Desconto (%)</span>
+              <input id="descontoPct" type="number" min="0" step="0.01" value="0" />
+            </label>
+            <button id="aplicarDesconto" class="btn">Aplicar</button>
+          </fieldset>
+
+          <fieldset>
+            <legend>Outros</legend>
+            <label>
+              <span class="label">Frete</span>
+              <input id="frete" type="number" min="0" step="0.01" value="0" />
+            </label>
+            <div class="kpis">
+              <div>
+                <div class="muted small">Subtotal</div>
+                <div id="subtotal" class="kpi">0,00</div>
+              </div>
+              <div>
+                <div class="muted small">Total</div>
+                <div id="total" class="kpi">0,00</div>
+              </div>
+              <div>
+                <div class="muted small">Recebido (R$)</div>
+                <input id="recebido" type="number" min="0" step="0.01" value="0" />
+              </div>
+              <div>
+                <div class="muted small">Troco (R$)</div>
+                <div id="troco" class="kpi">0,00</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="span-6">
+            <button id="fecharVenda" class="btn success">
+              💾 Fechar venda
+            </button>
+          </div>
+
+          <div class="span-3">
+            <label>
+              <span class="label">Troca • Venda #</span>
+              <input id="trocaVenda" placeholder="Ex.: 123" />
+            </label>
+          </div>
+          <div class="span-3">
+            <label>
+              <span class="label">Senha</span>
+              <select id="senhaTroca">
+                <option>Obrigatória p/ troca</option>
+                <option>Sem senha</option>
+              </select>
+            </label>
+            <button id="carregarTroca" class="btn">↻ Carregar troca</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Histórico -->
+      <section id="tab-historico" class="card is-hidden" aria-hidden="true">
+        <h2 class="card-title">Histórico</h2>
+        <div id="historyList" class="list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer" role="contentinfo">
+    <small>Atalhos: <kbd>Enter</kbd> adicionar • <kbd>Ctrl</kbd> + <kbd>Backspace</kbd> limpar • <kbd>Alt</kbd> + <kbd>D</kbd> alternar tema</small>
+  </footer>
+
+  <script src="./app.js" type="module"></script>
+</body>
+</html>
